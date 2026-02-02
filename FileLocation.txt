@@ -1,0 +1,9 @@
+projects
+└── myprojects/              <-- (현재 위치: 루트 폴더)
+    ├── .vscode/             <-- (기존 VS Code 설정)
+    ├── build/               <-- [생성] 빌드 파일들이 들어갈 쓰레기통 겸용 폴더
+    ├── src/                 <-- [생성] 소스 코드(.cpp, .h)는 여기에 모읍니다 (추천)
+    │   ├── main.cpp
+    │   └── ...
+    ├── CMakeLists.txt       <-- [필수] 프로젝트 최상단에 주문서 배치
+    └── .gitignore           <-- (Git을 쓴다면 필수)
