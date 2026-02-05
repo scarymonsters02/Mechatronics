@@ -1,57 +1,61 @@
 #include <Arduino.h>
 
-// 받을 데이터 개수
-#define DATA_COUNT 5
+// 데이터 개수 정의
+#define DATA_IN_COUNT 5  // OPi에서 받을 데이터 개수
+#define DATA_OUT_COUNT 5 // OPi로 보낼 데이터 개수
 
-// 데이터를 저장할 배열
-int receivedData[DATA_COUNT];
+// 데이터 저장용 배열
+int targetAngles[DATA_IN_COUNT] = {0, 0, 0, 0, 0}; // 수신값
+int sensorValues[DATA_OUT_COUNT] = {10, 20, 30, 40, 50}; // 송신값 (테스트용)
+
+// 타이머 변수
+unsigned long lastSendTime = 0;
+const int sendInterval = 50; // 50ms마다 송신 (1초에 20번)
 
 void setup() {
-  Serial.begin(115200);                      // 디버깅용
-  Serial2.begin(115200, SERIAL_8N1, 16, 17); // OPi 통신용
+  Serial.begin(115200); // PC 디버깅용
+  
+  // [중요] OPi 연결 (RX:16, TX:17)
+  // 타임아웃을 10ms로 짧게 설정해야 모터 제어 루프가 안 끊김
+  Serial2.begin(115200, SERIAL_8N1, 16, 17);
+  Serial2.setTimeout(10); 
 }
 
 void loop() {
-  // 시리얼 버퍼에 데이터가 있는지 확인
+  // ----------------------------------------
+  // 1. 수신 (OPi가 보낸 명령이 왔는가?) -> 즉시 처리
+  // ----------------------------------------
   if (Serial2.available() > 0) {
-    
-    // 1. 시작 문자('<')를 찾을 때까지 읽어서 버림 (데이터 싱크 맞추기)
     char c = Serial2.read();
-    
-    if (c == '<') {
-      // '<'를 만났으므로 이제부터 숫자 5개가 온다고 기대함
-      
-      for (int i = 0; i < DATA_COUNT; i++) {
-        // parseInt: 숫자가 나올 때까지 기다렸다가, 콤마(,)나 문자가 나오면 멈춤
-        // 즉, "512, 1024" 에서 512 뽑고, 콤마 건너뛰고 대기함
-        receivedData[i] = Serial2.parseInt(); 
+    if (c == '<') { // 패킷 시작 발견
+      for (int i = 0; i < DATA_IN_COUNT; i++) {
+        targetAngles[i] = Serial2.parseInt(); // 콤마 건너뛰며 숫자 추출
       }
-
-      // 마지막 종료 문자('>')까지 읽어서 버퍼를 비워줌 (안전장치)
-      Serial2.readStringUntil('>');
-
-      // --- 2. 데이터 처리 (모터 제어 등) ---
-      executeMotorControl();
+      Serial2.readStringUntil('>'); // 패킷 끝 처리
+      
+      // (디버깅) 잘 받았나 확인
+      Serial.printf("Recv: %d, %d, %d\n", targetAngles[0], targetAngles[1], targetAngles[2]);
     }
   }
-  
-  // (중요) 제어 루프는 여기서 계속 돌아야 함
-  // 단, parseInt는 데이터가 올 때까지 잠깐 멈출(Blocking) 수 있으므로
-  // OPi에서 데이터를 너무 띄엄띄엄 보내면 모터가 끊길 수 있음.
-  // 50ms ~ 100ms 주기로 꾸준히 보내주는 게 좋음.
-}
 
-void executeMotorControl() {
-  // 디버깅 출력
-  Serial.print("Recv: ");
-  for(int i=0; i<DATA_COUNT; i++){
-    Serial.print(receivedData[i]);
-    Serial.print(" ");
+  // ----------------------------------------
+  // 2. 송신 (내 센서값 보내기) -> 50ms마다 실행 (비동기)
+  // ----------------------------------------
+  unsigned long currentTime = millis();
+  if (currentTime - lastSendTime >= sendInterval) {
+    lastSendTime = currentTime;
+
+    // 센서값 갱신 (예시: 가변저항 읽기 등)
+    sensorValues[0] = analogRead(34); // 예시
+    sensorValues[1]++; // 테스트용 카운터 증가
+
+    // 데이터 전송: <값,값,값,값,값>\n
+    Serial2.printf("<%d,%d,%d,%d,%d>\n", 
+                   sensorValues[0], sensorValues[1], sensorValues[2], sensorValues[3], sensorValues[4]);
   }
-  Serial.println();
 
-  // 실제 모터 제어 적용 예시
-  // motor1.setTarget(receivedData[0]);
-  // motor2.setTarget(receivedData[1]);
-  // digitalWrite(LED_PIN, receivedData[4]);
+  // ----------------------------------------
+  // 3. 모터 제어 (P제어 등) -> 멈춤 없이 계속 실행
+  // ----------------------------------------
+  // motorControl(targetAngles); 
 }

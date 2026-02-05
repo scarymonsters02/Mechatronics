@@ -1,33 +1,82 @@
 #include <iostream>
+#include <cstdio>
+#include <cstring>
 #include <string>
-#include <array>
-//  #include <wiringPi.h>
-//  #include <wiringSerial.h>
-
-#define DATA_IN_COUNT 5
-#define DATA_OUT_COUNT 5
+#include <vector>
+#include <wiringPi.h>
+#include <wiringSerial.h>
+#include <unistd.h> // usleep
 
 using namespace std;
 
+// 데이터 개수
+#define DATA_CMD_COUNT 5 // 보낼 명령 개수
+
 int main() {
     int fd;
-    /*
-    if ((fd = serialOpen("/dev/ttyS2", 115200) < 0)) {
-        cout << "error: cannot open Serial port." << endl;
-        return 1;
+    if ((fd = serialOpen("/dev/ttyS2", 115200)) < 0) return 1;
+    if (wiringPiSetup() == -1) return 1;
+
+    // 보낼 명령 데이터
+    int cmdData[DATA_CMD_COUNT] = {90, 90, 90, 90, 0};
+
+    // 타이머용 변수
+    unsigned long lastSendTime = 0;
+    const int sendInterval = 50; // 50ms (단위: ms)
+
+    // 수신용 버퍼 문자열
+    string recvBuffer = "";
+
+    cout << "Bidirectional UART Started..." << endl;
+
+    while (true) {
+        // ==================================================
+        // 1. 수신 (ESP32가 보낸 데이터 읽기) - Non-blocking
+        // ==================================================
+        while (serialDataAvail(fd) > 0) {
+            char ch = serialGetchar(fd);
+
+            if (ch == '<') { 
+                recvBuffer = ""; // 시작 문자 오면 버퍼 초기화
+            } 
+            else if (ch == '>') { // 끝 문자 오면 파싱 시작
+                // CSV 파싱: "1024,512,100..." 문자열을 숫자로 분리
+                // 간단하게 수신된 원본만 출력해 봅니다 (실제론 sscanf나 strtok 사용)
+                cout << "[OPi Received]: " << recvBuffer << endl;
+                
+                // 파싱 예시 (sscanf 사용)
+                // int s1, s2, s3, s4, s5;
+                // sscanf(recvBuffer.c_str(), "%d,%d,%d,%d,%d", &s1, &s2, &s3, &s4, &s5);
+            } 
+            else if (ch != '\n') { // 줄바꿈 빼고 담기
+                recvBuffer += ch;
+            }
+        }
+
+        // ==================================================
+        // 2. 송신 (ESP32로 명령 보내기) - Timer Check
+        // ==================================================
+        unsigned long currentTime = millis(); // wiringPi의 millis()
+        if (currentTime - lastSendTime >= sendInterval) {
+            lastSendTime = currentTime;
+
+            // 보낼 데이터 갱신 (테스트용)
+            cmdData[0]++; 
+            if(cmdData[0] > 180) cmdData[0] = 0;
+
+            // 패킷 생성 및 전송
+            char sendBuf[64];
+            snprintf(sendBuf, sizeof(sendBuf), "<%d,%d,%d,%d,%d>\n", 
+                     cmdData[0], cmdData[1], cmdData[2], cmdData[3], cmdData[4]);
+            
+            serialPuts(fd, sendBuf);
+            // cout << "Sent: " << sendBuf; // 너무 시끄러우면 주석 처리
+        }
+
+        // CPU 점유율 방어용 미세 딜레이 (1ms)
+        // 통신 속도엔 지장 없고 CPU 과부하만 막아줌
+        delay(1); 
     }
 
-    if (wiringPiSetup() == -1) {
-        cout << "error: cannot reset wiringPi." << endl;
-        return 1;
-    }
-    */
-    array<int, 5> motor = {1, 2, 3, 4, 5};
-    cout << "setup success." << endl;
-
-    array<int, DATA_IN_COUNT> data2OPI;
-    array<int, DATA_OUT_COUNT> data4ESP;
-    
-    array<char, 20> buffer;
-    snprintf(buffer, sizeof(buffer), "<%d,%d,%d,%d,%d>\n", motor[0], motor[1], motor[2], motor[3], motor[4]);
+    return 0;
 }
