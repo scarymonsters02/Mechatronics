@@ -5,13 +5,13 @@
 #define OUTPUT_PIN 13
 
 int main() {
-    wiringPisetup();
+    wiringPiSetup();
     pinMode(INPUT_PIN, INPUT);
     pinMode(OUTPUT_PIN, OUTPUT);
 
-    digitalWrite(OUTPUT_PIN, 1);
+    digitalWrite(OUTPUT_PIN, HIGH);
     delay(1000);
-    digitalWrite(OUTPUT_PIN, 1);
+    digitalWrite(OUTPUT_PIN, LOW);
 
     int value = digitalRead(INPUT_PIN);
 }

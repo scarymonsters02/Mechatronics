@@ -12,10 +12,10 @@ using namespace std;
 // 데이터 개수
 #define DATA_CMD_COUNT 5 // 보낼 명령 개수
 
+int setupSerial();
+
 int main() {
-    int fd;
-    if ((fd = serialOpen("/dev/ttyS2", 115200)) < 0) return 1;
-    if (wiringPiSetup() == -1) return 1;
+    int fd = setupSerial();
 
     // 보낼 명령 데이터
     int cmdData[DATA_CMD_COUNT] = {90, 90, 90, 90, 0};
@@ -44,9 +44,9 @@ int main() {
                 // 간단하게 수신된 원본만 출력해 봅니다 (실제론 sscanf나 strtok 사용)
                 cout << "[OPi Received]: " << recvBuffer << endl;
                 
-                // 파싱 예시 (sscanf 사용)
-                // int s1, s2, s3, s4, s5;
-                // sscanf(recvBuffer.c_str(), "%d,%d,%d,%d,%d", &s1, &s2, &s3, &s4, &s5);
+                // CSV 파싱
+                int s1, s2, s3, s4, s5;
+                sscanf(recvBuffer.c_str(), "%d,%d,%d,%d,%d", &s1, &s2, &s3, &s4, &s5);
             } 
             else if (ch != '\n') { // 줄바꿈 빼고 담기
                 recvBuffer += ch;
@@ -79,4 +79,11 @@ int main() {
     }
 
     return 0;
+}
+
+int setupSerial() {
+    int fd;
+    if ((fd = serialOpen("/dev/ttyS2", 115200)) < 0) return 1;
+    if (wiringPiSetup() == -1) return 1;
+    return fd;
 }
