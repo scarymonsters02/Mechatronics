@@ -1,5 +1,5 @@
 #include <Arduino.h>
-
+#include <ESP32servo.h>
 // 데이터 개수 정의
 #define DATA_IN_COUNT 5  // OPi에서 받을 데이터 개수
 #define DATA_OUT_COUNT 5 // OPi로 보낼 데이터 개수
@@ -53,7 +53,7 @@ void loop() {
     Serial2.printf("<%d,%d,%d,%d,%d>\n", 
                    sensorValues[0], sensorValues[1], sensorValues[2], sensorValues[3], sensorValues[4]);
   }
-
+  
   // ----------------------------------------
   // 3. 모터 제어 (P제어 등) -> 멈춤 없이 계속 실행
   // ----------------------------------------
