@@ -13,6 +13,7 @@ unsigned long lastSendTime = 0;
 const int sendInterval = 50; // 50ms마다 송신 (1초에 20번)
 
 void setup() {
+ 
   Serial.begin(115200); // PC 디버깅용
   
   // [중요] OPi 연결 (RX:16, TX:17)
