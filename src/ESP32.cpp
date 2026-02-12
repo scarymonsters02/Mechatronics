@@ -1,8 +1,10 @@
 #include <Arduino.h>
-#include <ESP32servo.h>
+#include <ESP32Servo.h>
 // 데이터 개수 정의
 #define DATA_IN_COUNT 5  // OPi에서 받을 데이터 개수
 #define DATA_OUT_COUNT 5 // OPi로 보낼 데이터 개수
+#define TX 5
+#define RX 6
 
 // 데이터 저장용 배열
 int targetAngles[DATA_IN_COUNT] = {0, 0, 0, 0, 0}; // 수신값
@@ -12,12 +14,13 @@ int sensorValues[DATA_OUT_COUNT] = {10, 20, 30, 40, 50}; // 송신값 (테스트
 unsigned long lastSendTime = 0;
 const int sendInterval = 50; // 50ms마다 송신 (1초에 20번)
 
+HardwareSerial Serial2(1);
 void setup() {
+ 
   Serial.begin(115200); // PC 디버깅용
-  
   // [중요] OPi 연결 (RX:16, TX:17)
   // 타임아웃을 10ms로 짧게 설정해야 모터 제어 루프가 안 끊김
-  Serial2.begin(115200, SERIAL_8N1, 16, 17);
+  Serial2.begin(115200, SERIAL_8N1, RX, TX);
   Serial2.setTimeout(10); 
 }
 
