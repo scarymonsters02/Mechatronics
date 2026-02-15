@@ -86,7 +86,7 @@ int main() {
 
 int setupSerial() {
     int fd;
-    if ((fd = serialOpen("/dev/ttyS2", 115200)) < 0) return 1;
+    if ((fd = serialOpen("/dev/ttyS6", 115200)) < 0) return 1;
     if (wiringPiSetup() == -1) return 1;
     return fd;
 }

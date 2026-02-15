@@ -49,7 +49,7 @@ void loop() {
     lastSendTime = currentTime;
 
     // 센서값 갱신 (예시: 가변저항 읽기 등)
-    sensorValues[0] = analogRead(34); // 예시
+    
     sensorValues[1]++; // 테스트용 카운터 증가
 
     // 데이터 전송: <값,값,값,값,값>\n
