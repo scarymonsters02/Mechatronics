@@ -51,10 +51,12 @@ void loop() {
     // 센서값 갱신 (예시: 가변저항 읽기 등)
     
     sensorValues[1]++; // 테스트용 카운터 증가
-
+    if (sensorValues[1] > 200) sensorValues[1] = 10;
     // 데이터 전송: <값,값,값,값,값>\n
     Serial2.printf("<%d,%d,%d,%d,%d>\n", 
                    sensorValues[0], sensorValues[1], sensorValues[2], sensorValues[3], sensorValues[4]);
+    Serial.printf("[ESP32 Recived]: %d, %d, %d");
+
   }
   
   // ----------------------------------------
