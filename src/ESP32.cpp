@@ -18,6 +18,7 @@ HardwareSerial Serial2(1);
 void setup() {
  
   Serial.begin(115200); // PC 디버깅용
+  Serial.printf("Serial Ready\n");
   // [중요] OPi 연결 (RX:16, TX:17)
   // 타임아웃을 10ms로 짧게 설정해야 모터 제어 루프가 안 끊김
   Serial2.begin(115200, SERIAL_8N1, RX, TX);
@@ -25,6 +26,7 @@ void setup() {
 }
 
 void loop() {
+  Serial.printf("Serial Ready\n");
   // ----------------------------------------
   // 1. 수신 (OPi가 보낸 명령이 왔는가?) -> 즉시 처리
   // ----------------------------------------
@@ -37,7 +39,8 @@ void loop() {
       Serial2.readStringUntil('>'); // 패킷 끝 처리
       
       // (디버깅) 잘 받았나 확인
-      Serial.printf("Recv: %d, %d, %d\n", targetAngles[0], targetAngles[1], targetAngles[2]);
+      Serial.printf("[ESP32 Recived]: %d, %d, %d, %d, %d\n",
+         targetAngles[0], targetAngles[1], targetAngles[2], targetAngles[3], targetAngles[4]);
     }
   }
 
@@ -54,9 +57,9 @@ void loop() {
     if (sensorValues[1] > 200) sensorValues[1] = 10;
     // 데이터 전송: <값,값,값,값,값>\n
     Serial2.printf("<%d,%d,%d,%d,%d>\n", 
-                   sensorValues[0], sensorValues[1], sensorValues[2], sensorValues[3], sensorValues[4]);
-    Serial.printf("[ESP32 Recived]: %d, %d, %d");
-
+      sensorValues[0], sensorValues[1], sensorValues[2], sensorValues[3], sensorValues[4]);
+    Serial2.printf("[ESP32 Sent]: %d,%d,%d,%d,%d\n", 
+      sensorValues[0], sensorValues[1], sensorValues[2], sensorValues[3], sensorValues[4]); 
   }
   
   // ----------------------------------------
