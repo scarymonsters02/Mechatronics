@@ -45,7 +45,7 @@ int main() {
             else if (ch == '>') { // 끝 문자 오면 파싱 시작
                 // CSV 파싱: "1024,512,100..." 문자열을 숫자로 분리
                 // 간단하게 수신된 원본만 출력해 봅니다 (실제론 sscanf나 strtok 사용)
-                cout << "[OPi Received]: " << recvBuffer << endl;
+                
                 
                 // CSV 파싱
                 int s1, s2, s3, s4, s5;
@@ -55,7 +55,9 @@ int main() {
                 recvBuffer += ch;
             }
         }
+        
 
+        
         // ==================================================
         // 2. 송신 (ESP32로 명령 보내기) - Timer Check
         // ==================================================
@@ -73,7 +75,10 @@ int main() {
                      cmdData[0], cmdData[1], cmdData[2], cmdData[3], cmdData[4]);
             
             serialPuts(fd, sendBuf);
-            // cout << "Sent: " << sendBuf; // 너무 시끄러우면 주석 처리
+            cout << "[OPi Received]: " << recvBuffer;
+            if (!serialDataAvail(fd > 0)) cout << "[OPi Received]: " << "NONE";
+            cout << "       |       ";
+            cout << "[OPi Sent]: " << sendBuf << endl; 
         }
 
         // CPU 점유율 방어용 미세 딜레이 (1ms)
