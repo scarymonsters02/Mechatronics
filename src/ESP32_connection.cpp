@@ -7,6 +7,9 @@
 #include <wiringSerial.h>
 #include <unistd.h> // usleep
 
+// dmesg | grep ttys
+// 
+
 using namespace std;
 
 // 데이터 개수
