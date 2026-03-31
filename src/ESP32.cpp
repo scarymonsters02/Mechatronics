@@ -1,13 +1,13 @@
 #include <Arduino.h>
 #include <ESP32Servo.h>
 // 데이터 개수 정의
-#define DATA_IN_COUNT 5  // OPi에서 받을 데이터 개수
+#define DATA_IN_COUNT 8  // OPi에서 받을 데이터 개수
 #define DATA_OUT_COUNT 5 // OPi로 보낼 데이터 개수
 #define TX 5
 #define RX 6
 
 // 데이터 저장용 배열
-int targetAngles[DATA_IN_COUNT] = {0, 0, 0, 0, 0}; // 수신값
+int targetAngles[DATA_IN_COUNT] = {0, 0, 0, 0, 0, 0, 0, 0}; // 수신값
 int sensorValues[DATA_OUT_COUNT] = {10, 20, 30, 40, 50}; // 송신값 (테스트용)
 
 // 타이머 변수
@@ -39,8 +39,9 @@ void loop() {
       Serial2.readStringUntil('>'); // 패킷 끝 처리
       
       // (디버깅) 잘 받았나 확인
-      Serial.printf("[ESP32 Recived]: %d, %d, %d, %d, %d\n",
-         targetAngles[0], targetAngles[1], targetAngles[2], targetAngles[3], targetAngles[4]);
+      Serial.printf("[ESP32 Recived]: %d, %d, %d, %d, %d, %d, %d, %d\n",
+         targetAngles[0], targetAngles[1], targetAngles[2], targetAngles[3], 
+         targetAngles[4], targetAngles[5], targetAngles[6], targetAngles[7]);
     }
   }
 
