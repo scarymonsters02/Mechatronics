@@ -14,6 +14,26 @@ int sensorValues[DATA_OUT_COUNT] = {10, 20, 30, 40, 50}; // 송신값 (테스트
 unsigned long lastSendTime = 0;
 const int sendInterval = 50; // 50ms마다 송신 (1초에 20번)
 
+class thighServo : public Servo {
+public:
+  // 추가 기능 1: 서보 모터를 중앙(90도)으로 즉시 이동시키는 메서드
+  void center() {
+    this->write(90); // 부모 클래스(Servo)의 write() 메서드 사용
+  }
+
+  // 추가 기능 2: 현재 위치에서 원하는 각도만큼 '상대적'으로 이동하는 메서드
+  void moveRelative(int angle) {
+    int currentAngle = this->read(); // 부모 클래스의 read()로 현재 각도 확인
+    int targetAngle = currentAngle + angle;
+
+    // 각도가 0~180도를 벗어나지 않도록 제한
+    if (targetAngle > 180) targetAngle = 180;
+    if (targetAngle < 0) targetAngle = 0;
+
+    this->write(targetAngle);
+  }
+};
+
 HardwareSerial Serial2(1);
 void setup() {
   Serial.begin(115200); // PC 디버깅용
